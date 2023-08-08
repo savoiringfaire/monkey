@@ -1,20 +1,16 @@
-# This workflow will build a golang project
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-go
-
 name: Go
 
 on:
   push:
     branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0 # Required to fetch all tags
 
     - name: Set up Go
       uses: actions/setup-go@v4
@@ -27,12 +23,29 @@ jobs:
     - name: Test
       run: go test -v ./...
 
+    - name: Determine next version
+      id: version
+      run: |
+        git fetch --tags
+        latest_tag=$(git describe --tags $(git rev-list --tags --max-count=1))
+        echo "Latest tag: $latest_tag"
+        next_version=$(echo $latest_tag | awk -F. '{$NF++;print}' OFS='.')
+        echo "Next version: $next_version"
+        echo "NEXT_VERSION=$next_version" >> $GITHUB_ENV
+      shell: bash
+
+    - name: Create and push git tag
+      run: |
+        git config --global user.name 'GitHub Actions'
+        git config --global user.email 'actions@github.com'
+        git tag $NEXT_VERSION
+        git push origin $NEXT_VERSION
+
     - name: Create Release
-      if: github.ref == 'refs/heads/main'
       uses: softprops/action-gh-release@v1
       with:
         files: ./main
-        tag_name: ${{ github.sha }}
-        name: "Release ${{ github.sha }}"
-        body: "Automated release for commit ${{ github.sha }}"
+        tag_name: ${{ env.NEXT_VERSION }}
+        name: "Release ${{ env.NEXT_VERSION }}"
+        body: "Automated release for version ${{ env.NEXT_VERSION }}"
         token: ${{ secrets.GITHUB_TOKEN }}
