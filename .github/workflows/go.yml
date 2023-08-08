@@ -29,8 +29,10 @@ jobs:
 
     - name: Create Release
       if: github.ref == 'refs/heads/main'
-      run: |
-        gh auth login --with-token ${{ secrets.GITHUB_TOKEN }}
-        gh release create ${{ github.sha }} main --title "Release ${{ github.sha }}" --notes "Automated release for commit ${{ github.sha }}"
-      env:
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v1
+      with:
+        files: ./main
+        tag_name: ${{ github.sha }}
+        name: "Release ${{ github.sha }}"
+        body: "Automated release for commit ${{ github.sha }}"
+        token: ${{ secrets.GITHUB_TOKEN }}
