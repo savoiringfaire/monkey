@@ -9,8 +9,8 @@ import (
 )
 
 func TestEvalIntegerExpression(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected int64
 	}{
 		{"5", 5},
@@ -37,8 +37,8 @@ func TestEvalIntegerExpression(t *testing.T) {
 }
 
 func TestEvalBooleanExpression(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected bool
 	}{
 		{"true", true},
@@ -68,8 +68,8 @@ func TestEvalBooleanExpression(t *testing.T) {
 }
 
 func TestBangOperator(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected bool
 	}{
 		{"!true", false},
@@ -87,8 +87,8 @@ func TestBangOperator(t *testing.T) {
 }
 
 func TestIfElseExpressions(t *testing.T) {
-	tests := []struct{
-		input string
+	tests := []struct {
+		input    string
 		expected interface{}
 	}{
 		{"if (true) { 10 }", 10},
@@ -100,7 +100,7 @@ func TestIfElseExpressions(t *testing.T) {
 		{"if (1 < 2) { 10 } else { 20 }", 10},
 	}
 
-	for _, tt := range(tests) {
+	for _, tt := range tests {
 		evaluated := testEval(tt.input)
 		integer, ok := tt.expected.(int)
 		if ok {
@@ -121,7 +121,7 @@ func testNullObject(t *testing.T, obj object.Object) bool {
 }
 
 func testEval(input string) object.Object {
-	l := lexer.New(input) 
+	l := lexer.New(input)
 	p := parser.New(l)
 	program := p.ParseProgram()
 

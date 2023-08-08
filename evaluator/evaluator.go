@@ -6,8 +6,8 @@ import (
 )
 
 var (
-	NULL = &object.Null{}
-	TRUE = &object.Boolean{Value: true}
+	NULL  = &object.Null{}
+	TRUE  = &object.Boolean{Value: true}
 	FALSE = &object.Boolean{Value: false}
 )
 
@@ -88,13 +88,13 @@ func evalIntegerInfixExpression(operator string, left, right object.Object) obje
 
 	switch operator {
 	case "-":
-		return &object.Integer{ Value: leftValue - rightValue }
+		return &object.Integer{Value: leftValue - rightValue}
 	case "+":
-		return &object.Integer{ Value: leftValue + rightValue }
+		return &object.Integer{Value: leftValue + rightValue}
 	case "*":
-		return &object.Integer{ Value: leftValue * rightValue }
+		return &object.Integer{Value: leftValue * rightValue}
 	case "/":
-		return &object.Integer{ Value: leftValue / rightValue }
+		return &object.Integer{Value: leftValue / rightValue}
 	case "<":
 		return nativeBoolToBooleanObject(leftValue < rightValue)
 	case ">":
@@ -125,7 +125,7 @@ func evalMinusPrefixOperatorExpression(right object.Object) object.Object {
 		return NULL
 	}
 
-	return &object.Integer{ Value: 0 - value.Value }
+	return &object.Integer{Value: 0 - value.Value}
 }
 
 func evalBangOperatorExpression(right object.Object) object.Object {
