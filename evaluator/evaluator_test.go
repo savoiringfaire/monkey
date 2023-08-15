@@ -8,6 +8,19 @@ import (
 	"monkey/parser"
 )
 
+func TestWhileStatements(t *testing.T) {
+	tests := []struct{
+		input string
+		expected int64
+	}{
+		{"let a = 0; while ( a < 5 ) { a = a + 1; }; a", 5},
+	}
+
+	for _, tt := range tests {
+		testIntegerObject(t, testEval(tt.input), tt.expected)
+	}
+}
+
 func TestLetStatements(t *testing.T) {
 	tests := []struct {
 		input    string

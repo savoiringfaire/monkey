@@ -7,6 +7,43 @@ import (
 	"testing"
 )
 
+func TestWhileStatement(t *testing.T) {
+	input := `let x = 1; while (x < 5) { x = 1; }`
+
+	l := lexer.New(input)
+	p := New(l)
+
+	program := p.ParseProgram()
+	checkParserErrors(t, p)
+
+	if len(program.Statements) != 2 {
+		t.Fatalf("program.Statements does not contain %d statements. got=%d\n",
+			1, len(program.Statements))
+	}
+
+	stmt, ok := program.Statements[1].(*ast.WhileStatement)
+	if !ok {
+		t.Fatalf("program.Statements[0] is not ast.WhileStatement. got=%T",
+			program.Statements[1])
+	}
+
+	if !testInfixExpression(t, stmt.Condition, "x", "<", 5) {
+		return
+	}
+
+	if len(stmt.Body.Statements) != 1 {
+		t.Errorf("consequence is not 1 statements. got=%d\n",
+			len(stmt.Body.Statements))
+	}
+
+	_, ok = stmt.Body.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Statements[0] is not ast.ExpressionStatement. got=%T",
+			stmt.Body.Statements[0])
+	}
+}
+
+
 func TestLetStatements(t *testing.T) {
 	tests := []struct {
 		input              string
@@ -197,6 +234,8 @@ func TestParsingInfixExpressions(t *testing.T) {
 		{"5 / 5;", 5, "/", 5},
 		{"5 > 5;", 5, ">", 5},
 		{"5 < 5;", 5, "<", 5},
+		{"5 <= 5;", 5, "<=", 5},
+		{"5 >= 5;", 5, ">=", 5},
 		{"5 == 5;", 5, "==", 5},
 		{"5 != 5;", 5, "!=", 5},
 		{"foobar + barfoo;", "foobar", "+", "barfoo"},

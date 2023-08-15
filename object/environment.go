@@ -29,3 +29,15 @@ func (e *Environment) Set(name string, val Object) Object {
 	e.store[name] = val
 	return val
 }
+
+func (e *Environment) SetExisting(name string, val Object) bool {
+	_, ok := e.store[name]
+	if ok {
+		e.store[name] = val
+		return true
+	} else if e.outer != nil {
+		ok = e.outer.SetExisting(name, val)
+	}
+
+	return ok
+}

@@ -32,6 +32,21 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.ExpressionStatement:
 		return Eval(node.Expression, env)
 
+	case *ast.WhileStatement:
+		condition := Eval(node.Condition, env)
+		if isError(condition) {
+			return condition
+		}
+
+		for isTruthy(condition) {
+			Eval(node.Body, env)
+			condition = Eval(node.Condition, env)
+			if isError(condition) {
+				return condition
+			}
+			fmt.Printf("whileCondition: %s %t\n", condition.Inspect(), isTruthy(condition))
+		}
+
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
 
@@ -71,15 +86,32 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalPrefixExpression(node.Operator, right)
 
 	case *ast.InfixExpression:
-		left := Eval(node.Left, env)
-		if isError(left) {
-			return left
+		if node.Operator == "=" {
+			right := Eval(node.Right, env)
+			if isError(right) {
+				return right
+			}
+
+			ident, ok := node.Left.(*ast.Identifier)
+			if !ok {
+				return newError("not an identifier: %s", node.Left.String())
+			}
+
+			ok = env.SetExisting(ident.Value, right)
+			if !ok {
+				return newError("identifier not found: " + ident.Value)
+			}
+		} else {
+			left := Eval(node.Left, env)
+			if isError(left) {
+				return left
+			}
+			right := Eval(node.Right, env)
+			if isError(right) {
+				return right
+			}
+			return evalInfixExpression(node.Operator, left, right)
 		}
-		right := Eval(node.Right, env)
-		if isError(right) {
-			return right
-		}
-		return evalInfixExpression(node.Operator, left, right)
 
 	case *ast.BlockStatement:
 		return evalBlockStatement(node.Statements, env)

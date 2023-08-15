@@ -12,6 +12,7 @@ import (
 const (
 	_ int = iota
 	LOWEST
+	ASSIGN
 	EQUALS
 	LESSGREATER
 	SUM
@@ -25,10 +26,13 @@ var precedences = map[token.TokenType]int{
 	token.NOT_EQ:   EQUALS,
 	token.LT:       LESSGREATER,
 	token.GT:       LESSGREATER,
+	token.LT_EQ:    LESSGREATER,
+	token.GT_EQ:    LESSGREATER,
 	token.PLUS:     SUM,
 	token.MINUS:    SUM,
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
+	token.ASSIGN:   ASSIGN,
 	token.LPAREN:   CALL,
 }
 
@@ -74,8 +78,11 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.MINUS, p.parseInfixExpression)
 	p.registerInfix(token.SLASH, p.parseInfixExpression)
 	p.registerInfix(token.ASTERISK, p.parseInfixExpression)
+	p.registerInfix(token.ASSIGN, p.parseInfixExpression)
 	p.registerInfix(token.EQ, p.parseInfixExpression)
 	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
+	p.registerInfix(token.LT_EQ, p.parseInfixExpression)
+	p.registerInfix(token.GT_EQ, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
 	p.registerInfix(token.LPAREN, p.parseCallExpression)
@@ -85,6 +92,7 @@ func New(l *lexer.Lexer) *Parser {
 
 	return p
 }
+
 
 func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	exp := &ast.CallExpression{Token: p.curToken, Function: function}
@@ -114,6 +122,29 @@ func (p *Parser) parseCallArguments() []ast.Expression {
 	}
 
 	return args
+}
+
+func (p *Parser) parseWhileStatement() ast.Statement {
+	stmt := &ast.WhileStatement{Token: p.curToken}
+
+	if !p.expectPeek(token.LPAREN) {
+		return nil
+	}
+
+	p.nextToken()
+	stmt.Condition = p.parseExpression(LOWEST)
+
+	if !p.expectPeek(token.RPAREN) {
+		return nil
+	}
+
+	if !p.expectPeek(token.LBRACE) {
+		return nil
+	}
+
+	stmt.Body = p.parseBlockStatement()
+
+	return stmt
 }
 
 func (p *Parser) parseFunctionLiteral() ast.Expression {
@@ -309,14 +340,20 @@ func (p *Parser) ParseProgram() *ast.Program {
 }
 
 func (p *Parser) parseStatement() ast.Statement {
+	var exp ast.Statement
+
 	switch p.curToken.Type {
 	case token.LET:
-		return p.parseLetStatement()
+		exp = p.parseLetStatement()
 	case token.RETURN:
-		return p.parseReturnStatement()
+		exp = p.parseReturnStatement()
+	case token.WHILE:
+		exp = p.parseWhileStatement()
 	default:
-		return p.parseExpressionStatement()
+		exp = p.parseExpressionStatement()
 	}
+
+	return exp
 }
 
 func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {

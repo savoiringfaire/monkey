@@ -19,6 +19,8 @@ const (
 
 	LT     = "<"
 	GT     = ">"
+	LT_EQ  = "<="
+	GT_EQ  = ">="
 	EQ     = "=="
 	NOT_EQ = "!="
 
@@ -35,6 +37,7 @@ const (
 	IF       = "if"
 	ELSE     = "else"
 	RETURN   = "return"
+	WHILE    = "while"
 )
 
 type TokenType string
@@ -52,6 +55,7 @@ var keywords = map[string]TokenType{
 	"if":     IF,
 	"else":   ELSE,
 	"return": RETURN,
+	"while":  WHILE,
 }
 
 func LookupIdent(ident string) TokenType {

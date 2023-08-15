@@ -44,6 +44,27 @@ func (p *Program) String() string {
 	return out.String()
 }
 
+type WhileStatement struct {
+	Condition Expression
+	Token       token.Token
+	Body *BlockStatement
+}
+
+func (ws *WhileStatement) statementNode() {}
+func (ws *WhileStatement) TokenLiteral() string { return ws.Token.Literal }
+func (ws *WhileStatement) String() string {
+	var out bytes.Buffer
+
+	out.WriteString("while")
+	out.WriteString(" (")
+	out.WriteString(ws.Condition.String())
+	out.WriteString(") {")
+	out.WriteString(ws.Body.String())
+	out.WriteString("}")
+
+	return out.String()
+}
+
 type LetStatement struct {
 	Token token.Token
 	Name  *Identifier
