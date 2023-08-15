@@ -8,6 +8,34 @@ import (
 	"monkey/parser"
 )
 
+func TestStringConcatenation(t *testing.T) {
+	input := `"Hello " + "World!"`
+
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("evaluated not *object.String. got=%T", evaluated)
+	}
+
+	if str.Value != "Hello World!" {
+		t.Errorf("Value not `%s`. got=`%s`", "Hello World!", str.Value)
+	}
+}
+
+func TestStringLiteral(t *testing.T) {
+	input := `"Hello World!"`
+
+	evaluated := testEval(input)
+	str, ok := evaluated.(*object.String)
+	if !ok {
+		t.Fatalf("evaluated not *object.String. got=%T", evaluated)
+	}
+
+	if str.Value != "Hello World!" {
+		t.Errorf("Value not `%s`. got=`%s`", "Hello World!", str.Value)
+	}
+}
+
 func TestWhileStatements(t *testing.T) {
 	tests := []struct{
 		input string

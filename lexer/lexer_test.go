@@ -32,6 +32,9 @@ if (5 < 10) {
 while (true) {
 	x + 5;
 }
+
+"foobar"
+"foo bar"
 `
 
 	tests := []struct {
@@ -129,6 +132,8 @@ while (true) {
 		{token.INT, "5"},
 		{token.SEMICOLON, ";"},
 		{token.RBRACE, "}"},
+		{token.STRING, "foobar"},
+		{token.STRING, "foo bar"},
 		{token.EOF, ""},
 	}
 

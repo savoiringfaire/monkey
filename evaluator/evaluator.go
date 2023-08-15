@@ -44,11 +44,13 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 			if isError(condition) {
 				return condition
 			}
-			fmt.Printf("whileCondition: %s %t\n", condition.Inspect(), isTruthy(condition))
 		}
 
 	case *ast.IntegerLiteral:
 		return &object.Integer{Value: node.Value}
+
+	case *ast.StringLiteral:
+		return &object.String{Value: node.Value}
 
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
@@ -217,12 +219,30 @@ func evalInfixExpression(operator string, left, right object.Object) object.Obje
 	switch {
 	case left.Type() == object.INTEGER_OBJ && right.Type() == object.INTEGER_OBJ:
 		return evalIntegerInfixExpression(operator, left, right)
+	case left.Type() == object.STRING_OBJ && right.Type() == object.STRING_OBJ:
+		return evalStringInfixExpression(operator, left, right)
 	case operator == "==":
 		return nativeBoolToBooleanObject(left == right)
 	case operator == "!=":
 		return nativeBoolToBooleanObject(left != right)
 	case left.Type() != right.Type():
 		return newError("type mismatch: %s %s %s", left.Type(), operator, right.Type())
+	default:
+		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
+	}
+}
+
+func evalStringInfixExpression(operator string, left, right object.Object) object.Object {
+	rightValue := right.(*object.String).Value
+	leftValue := left.(*object.String).Value
+
+	switch operator {
+	case "+":
+		return &object.String{Value: leftValue + rightValue}
+	case "==":
+		return nativeBoolToBooleanObject(leftValue == rightValue)
+	case "!=":
+		return nativeBoolToBooleanObject(leftValue != rightValue)
 	default:
 		return newError("unknown operator: %s %s %s", left.Type(), operator, right.Type())
 	}
